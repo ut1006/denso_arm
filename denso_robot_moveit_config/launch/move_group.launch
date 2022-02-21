@@ -23,9 +23,11 @@
   <arg name="publish_monitored_planning_scene" default="true"/>
 
   <!-- Planning Functionality -->
-  <include ns="move_group" file="$(find denso_robot_moveit_config)/launch/planning_pipeline.launch.xml">
-    <arg name="pipeline" value="ompl" />
-  </include>
+  <group ns="move_group/planning_pipelines">
+    <include ns="ompl" file="$(find denso_robot_moveit_config)/launch/planning_pipeline.launch.xml">
+      <arg name="pipeline" value="ompl" />
+    </include>
+  </group>
 
   <!-- Trajectory Execution Functionality -->
   <include ns="move_group" file="$(find denso_robot_moveit_config)/launch/trajectory_execution.launch.xml" if="$(arg allow_trajectory_execution)">
@@ -48,6 +50,9 @@
     <param name="allow_trajectory_execution" value="$(arg allow_trajectory_execution)"/>
     <param name="max_safe_path_cost" value="$(arg max_safe_path_cost)"/>
     <param name="jiggle_fraction" value="$(arg jiggle_fraction)" />
+
+    <!-- Clarify the default_planning_pipeline -->
+    <param name="default_planning_pipeline" value="ompl" />
 
     <!-- MoveGroup capabilities to load -->
     <param name="capabilities" value="move_group/MoveGroupCartesianPathService
