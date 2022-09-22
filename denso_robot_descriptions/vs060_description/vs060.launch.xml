@@ -1,5 +1,5 @@
 <launch>
-	<param name="robot_name" value="VS060A3-AV6-NNN-NNN"/>
+	<param name="robot_name" value="VS060A3-AV6-W4N-ANN"/>
 	<param name="robot_joints" value="6"/>
 	<param name="joint_1" value="1"/>
 	<param name="joint_2" value="1"/>

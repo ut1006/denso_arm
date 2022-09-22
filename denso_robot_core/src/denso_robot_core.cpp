@@ -106,6 +106,7 @@ HRESULT DensoRobotCore::Initialize()
       }
       else
       {
+        // m_mode == 0がスレーブモード？
         m_ctrl = boost::make_shared<DensoControllerRC8>(name, &m_mode, ros::Duration(ctrl_cycle_msec / 1000.0));
       }
       break;
