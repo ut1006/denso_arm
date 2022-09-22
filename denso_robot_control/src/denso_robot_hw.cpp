@@ -335,6 +335,7 @@ HRESULT DensoRobotHW::CheckRobotType()
   if (FAILED(hr))
   {
     printErrorDescription(hr, "Failed to add @TYPE_NAME");
+
     return hr;
   }
   m_rob->get_Variable(strTypeName, &pVar);
@@ -342,9 +343,15 @@ HRESULT DensoRobotHW::CheckRobotType()
   if (FAILED(hr))
   {
     printErrorDescription(hr, "Failed to get @TYPE_NAME");
+
     return hr;
   }
+
   strTypeName = DensoBase::ConvertBSTRToString(vntVal->bstrVal);
+
+  // m_robNameとstrTypeNameが一致していなかったらエラー
+  // m_robNameにはvs060.launch.xmlで記述したロボットタイプ名(robot_name)が入る
+  // strTypeNameにはロボットから直接取得した？ロボットタイプ名が入る
   if (strncmp(m_robName.c_str(), strTypeName.c_str(),
               (m_robName.length() < strTypeName.length()) ? m_robName.length() : strTypeName.length()))
   {
