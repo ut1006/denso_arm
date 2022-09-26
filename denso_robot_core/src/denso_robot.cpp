@@ -584,7 +584,7 @@ HRESULT DensoRobot::ExecCurJnt(std::vector<double>& pose)
 
 HRESULT DensoRobot::ExecSlaveMove(const std::vector<double>& pose, std::vector<double>& joint)
 {
-  HRESULT hr = S_OK;
+  HRESULT hr = S_OK; // hr == 0
   int argc;
   VARIANT_Vec vntArgs;
   VARIANT_Ptr vntRet(new VARIANT());
@@ -617,7 +617,13 @@ HRESULT DensoRobot::ExecSlaveMove(const std::vector<double>& pose, std::vector<d
     vntArgs.push_back(*vntTmp.get());
   }
 
+  // 正常だとhr == 0
+
   hr = m_vecService[DensoBase::SRV_ACT]->ExecFunction(ID_ROBOT_EXECUTE, vntArgs, vntRet);
+
+  // 正常だと hr == 253756673
+  // 異常だと hr == -2147481344
+
   if (SUCCEEDED(hr))
   {
     HRESULT hrTmp = ParseRecvParameter(vntRet, m_position, m_joint, m_trans, m_recv_miniio, m_recv_handio, m_timestamp,
@@ -631,6 +637,8 @@ HRESULT DensoRobot::ExecSlaveMove(const std::vector<double>& pose, std::vector<d
     }
   }
 
+  // 正常だと hr == 253756673
+  // 異常だと hr == -2091908831
   return hr;
 }
 
