@@ -46,6 +46,7 @@
 #include "bcap_common.h"
 #include "bcap_funcid.h"
 #include "bcap_client.h"
+#include <stdio.h>
 
 /**
  * @def   _RETRY_MIN
@@ -142,17 +143,23 @@ send_receive(int index, struct BCAP_PACKET *packet_send,
       (bcap_param->device.type == CONN_TCP) ? 0 : bcap_param->serial;
   packet_recv->id = E_FAIL;
 
+  // ここのfor文内で指令値の取得が間に合わず、と指令値生成エラーが出る
+  // bcap_param->retryの値をいじればいいのか？
+  // そう簡単な話じゃなさそう。ループ増やしたらあとの
+  // hr = packet_recv->id;
+  // で負の値が代入された
   for (retry_cnt = 0; retry_cnt < bcap_param->retry; retry_cnt++) {
     packet_send->serial = bcap_param->serial++;
     if (bcap_param->serial == 0)
       bcap_param->serial = 1;
 
     hr = bcap_send(&bcap_param->device, packet_send);
-    if (FAILED(hr))
+    if (FAILED(hr)) 
       goto exit_proc;
 
     while (1) {
       packet_recv->argc = 1;
+      // ここで本来は正の値が返るが、遅延していると負の値が返る
       hr = bcap_recv(&bcap_param->device, packet_recv, 1);
       if (FAILED(hr)) {
         goto retry_proc;
@@ -288,6 +295,9 @@ invoke_function(int fd, int32_t id, int argc, char *format, ...)
   }
 
   hr = send_receive(fd, &packet_send, &packet_recv);
+
+  // 指令値生成遅延
+  // 異常だとここで hr == -2147481344
 
   if (SUCCEEDED(hr)) {
     if ((pRet == NULL) || (vt != vntRet.vt)) {

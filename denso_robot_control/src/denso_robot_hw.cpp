@@ -423,6 +423,7 @@ void DensoRobotHW::write(ros::Time time, ros::Duration period)
 
     HRESULT hr = m_rob->ExecSlaveMove(pose, m_joint);
 
+    // hrは符の値だとエラー
     if (SUCCEEDED(hr))
     {
       if (m_recvfmt & DensoRobot::RECVFMT_HANDIO)
