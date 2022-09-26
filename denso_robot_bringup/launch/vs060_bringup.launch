@@ -1,10 +1,16 @@
 <launch>
   <arg name="sim" default="true" />
-  <arg name="ip_address" default="192.168.0.1" />
+  <!-- 研究室のvs060のipアドレス -->
+  <arg name="ip_address" default="192.168.11.100" />
+  <!--  ref:http://wiki.ros.org/denso_robot_ros/Tutorials/How%20to%20read%20or%20write%20IO%20while%20controlling%20robot%20with%20MoveIt%21 -->
+  <arg name="send_format" default="0" /> <!-- 特にI/Oに書き込みしない -->
+  <arg name="recv_format" default="2" /> <!-- 特にI/Oを読み取りしない, ただ軸情報は取得する -->
 
   <include file="$(find denso_robot_bringup)/launch/denso_robot_bringup.launch">
     <arg name="robot_name" value="vs060"/>
     <arg name="sim" value="$(arg sim)"/>
     <arg name="ip_address" value="$(arg ip_address)"/>
+    <arg name="send_format" value="$(arg send_format)" />
+    <arg name="recv_format" value="$(arg recv_format)" />
   </include>
 </launch>

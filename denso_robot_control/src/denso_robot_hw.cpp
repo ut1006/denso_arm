@@ -50,8 +50,8 @@ DensoRobotHW::DensoRobotHW()
 
   m_robName = "";
   m_robJoints = 0;
-  m_sendfmt = DensoRobot::SENDFMT_MINIIO | DensoRobot::SENDFMT_HANDIO;
-  m_recvfmt = DensoRobot::RECVFMT_POSE_PJ | DensoRobot::RECVFMT_MINIIO | DensoRobot::RECVFMT_HANDIO;
+  m_sendfmt = DensoRobot::SENDFMT_MINIIO | DensoRobot::SENDFMT_HANDIO; // 288
+  m_recvfmt = DensoRobot::RECVFMT_POSE_PJ | DensoRobot::RECVFMT_MINIIO | DensoRobot::RECVFMT_HANDIO; // 292
 }
 
 DensoRobotHW::~DensoRobotHW()
@@ -165,12 +165,13 @@ HRESULT DensoRobotHW::Initialize()
     return hr;
   }
 
-  hr = m_rob->ExecCurJnt(m_joint);
+  hr = m_rob->ExecCurJnt(m_joint); // m_jointに初期ジョイント値を代入
   if (FAILED(hr))
   {
     printErrorDescription(hr, "Failed to get current joint");
     return hr;
   }
+
   for (int i = 0; i < m_robJoints; i++)
   {
     switch (m_type[i])
@@ -419,7 +420,9 @@ void DensoRobotHW::write(ros::Time time, ros::Duration period)
       bits |= (1 << i);
     }
     pose.push_back(0x400000 | bits);
+
     HRESULT hr = m_rob->ExecSlaveMove(pose, m_joint);
+
     if (SUCCEEDED(hr))
     {
       if (m_recvfmt & DensoRobot::RECVFMT_HANDIO)
