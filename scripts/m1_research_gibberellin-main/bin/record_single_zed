@@ -1,0 +1,34 @@
+#!/bin/bash
+
+prefix=/zedm/zed_node/
+
+A1=${prefix}depth/camera_info
+A2=${prefix}disparity/disparity_image
+A3=${prefix}left/camera_info
+A4=${prefix}left/image_rect_color
+A5=${prefix}left/image_rect_gray
+A6=${prefix}left_raw/camera_info
+A7=${prefix}left_raw/image_raw_color
+A8=${prefix}left_raw/image_raw_gray
+A9=${prefix}point_cloud/cloud_registered
+A10=${prefix}rgb/camera_info
+A11=${prefix}rgb/image_rect_color
+A12=${prefix}rgb/image_rect_gray
+A13=${prefix}rgb_raw/camera_info
+A14=${prefix}rgb_raw/image_raw_color
+A15=${prefix}rgb_raw/image_raw_gray
+A16=${prefix}right/camera_info
+A17=${prefix}right/image_rect_color
+A18=${prefix}right/image_rect_gray
+A19=${prefix}right_raw/camera_info
+A20=${prefix}right_raw/image_raw_color
+A21=${prefix}right_raw/image_raw_gray
+A22=${prefix}stereo/image_rect_color
+A23=${prefix}stereo_raw/image_raw_color
+
+
+rosbag record \
+/tf /tf_static \
+$A1 $A2 $A3 $A4 $A5 $A6 $A7 $A8 $A9 $A10 \
+$A11 $A12 $A13 $A14 $A15 $A16 $A17 $A18 $A19 $A20 $A21 $A22 $A23 \
+-o ~/data/
