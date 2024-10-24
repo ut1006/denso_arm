@@ -1,1 +1,0 @@
-python grape_pos_publisher.py --weight /home/kamiya/Documents/YOLOv5/yolov5/runs/train/grape_harvest_cg/weights/last.pt

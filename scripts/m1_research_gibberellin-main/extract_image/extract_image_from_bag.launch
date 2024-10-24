@@ -1,9 +1,0 @@
-<launch>
-  <arg name="filename" default="2021-06-20-19-56-30" />
-  <!-- <node pkg="rosbag" type="play" name="rosbag" args="/home/kamiya/data/$(arg filename).bag"/> -->
-  <node pkg="rosbag" type="play" name="rosbag" args="/media/kamiya/Extreme\ SSD/0627/$(arg filename).bag"/>
-  <node name="extract" pkg="image_view" type="extract_images" respawn="false" output="screen" cwd="ROS_HOME">
-    <remap from="image" to="/zedC/zed_node_C/left/image_rect_color"/>
-    <param name="filename_format" value="/home/kamiya/data/gibbe_images_20210627/$(arg filename)-%04d.jpg" />
-  </node>
-</launch>
