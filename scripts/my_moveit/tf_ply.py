@@ -86,7 +86,7 @@ def main(ply_folder):
         filtered_points, filtered_colors = filter_points(transformed_points, colors)
         
         # Save filtered and transformed PLY
-        save_transformed_ply(ply_path, filtered_points, filtered_colors)
-
+        # save_transformed_ply(ply_path, filtered_points, filtered_colors)
+        save_transformed_ply(ply_path,transformed_points, colors)
 # Run the transformation and filtering
 main("output")
