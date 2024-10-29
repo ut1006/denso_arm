@@ -26,11 +26,11 @@ def load_csv_transform(csv_path):
         tx, ty, tz = map(float, row[:3])
         rx, ry, rz, rw = map(float, row[3:])
     translation = np.array([tx, ty, tz])
-    rotation = R.from_quat([rx, ry, rz, rw]).inv()
+    rotation = R.from_quat([rx, ry, rz, rw])
     return translation, rotation
 
 def transform_points(points, translation, rotation):
-    transformed_points = rotation.apply(points) - translation
+    transformed_points = rotation.apply(points) + translation
     return transformed_points
 
 def rgb_to_hsv(color):
