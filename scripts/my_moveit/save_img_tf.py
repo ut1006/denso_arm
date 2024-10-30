@@ -41,7 +41,7 @@ def right_image_rect_callback(msg):
 def save_tf_data(count, dir_name):
     try:
         # base_linkからzedm_camera_centerまでのTFを取得
-        (trans, rot) = listener.lookupTransform('base_link', 'zedm_camera_center', rospy.Time(0))
+        (trans, rot) = listener.lookupTransform('base_link', 'zedm_left_camera_frame', rospy.Time(0))
 
         # CSVファイルに姿勢情報を保存
         tf_filename = os.path.join(dir_name, f"tf{count:04d}.csv")  # 保存先を画像と同じディレクトリに変更
@@ -53,6 +53,7 @@ def save_tf_data(count, dir_name):
             # 平行移動と回転の値をコンマ区切りで書き込む in mlli-meter!!!
             writer.writerow([trans[0] * 1000, trans[1] * 1000, trans[2] * 1000, rot[0], rot[1], rot[2], rot[3]])
         print(f"Saved TF data to {tf_filename}")
+        print(trans,rot)
     except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
         print("Failed to get transform")
 
