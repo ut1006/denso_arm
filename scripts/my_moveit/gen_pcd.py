@@ -52,8 +52,8 @@ def process_pair(disp_path, image_path):
     H, W = depth.shape
     xx, yy = np.meshgrid(np.arange(W), np.arange(H))
   
-    # points_grid = np.stack(((xx - cx1) / fx, (yy - cy) / fy, np.ones_like(xx)), axis=0) * depth
-    points_grid = np.stack(((xx-cx1/2) / fx, (yy-cy/2) / fy, np.ones_like(xx)), axis=0) * depth
+    # points_grid = np.stack(((xx - cx1) / fx, (yy - cy) / fy, np.ones_like(xx)), axis=0) * depth 単位はメートルに
+    points_grid = np.stack(((xx-cx1/2) / fx, (yy-cy/2) / fy, np.ones_like(xx)), axis=0) * depth /1000
     mask = np.ones((H, W), dtype=bool)
 
     # Remove flying points

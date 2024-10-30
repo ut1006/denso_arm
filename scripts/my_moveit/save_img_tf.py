@@ -50,8 +50,8 @@ def save_tf_data(count, dir_name):
             # ヘッダーの行
             writer.writerow(['Translation X', 'Translation Y', 'Translation Z',
                              'Rotation X', 'Rotation Y', 'Rotation Z', 'Rotation W'])
-            # 平行移動と回転の値をコンマ区切りで書き込む in mlli-meter!!!
-            writer.writerow([trans[0] * 1000, trans[1] * 1000, trans[2] * 1000, rot[0], rot[1], rot[2], rot[3]])
+            # 平行移動と回転の値をコンマ区切りで書き込む 全体をメートルに治した。
+            writer.writerow([trans[0] , trans[1] , trans[2] , rot[0], rot[1], rot[2], rot[3]])
         print(f"Saved TF data to {tf_filename}")
         print(trans,rot)
     except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
