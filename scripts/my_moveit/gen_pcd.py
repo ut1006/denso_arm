@@ -9,7 +9,12 @@ import re
 fx, fy, cx1, cy = 1400.6, 1400.6, 1103.65, 574.575
 cx2 = 1102.84
 baseline = 62.8749  # in millimeters
-
+# 回転行列 (Z軸周りに-90度)
+Rotation_Z_90 = np.array([
+    [0, 1, 0],
+    [-1, 0, 0],
+    [0, 0, 1]
+])
 # Function to write points and colors to a PLY file
 def write_ply(filename, points, colors):
     header = f'''ply
@@ -33,12 +38,13 @@ def process_pair(disp_path, image_path):
     disp = np.load(disp_path)
     image = imread(image_path)
 
-    # Inverse project
+    # Inverse project. PLY origin is on the left camera and x↑, y↓, z×. 
     depth = (fx * baseline) / (-disp + (cx2 - cx1))
     H, W = depth.shape
     xx, yy = np.meshgrid(np.arange(W), np.arange(H))
-    points_grid = np.stack(((xx - cx1) / fx, (yy - cy) / fy, np.ones_like(xx)), axis=0) * depth
-
+  
+    # points_grid = np.stack(((xx - cx1) / fx, (yy - cy) / fy, np.ones_like(xx)), axis=0) * depth
+    points_grid = np.stack(((xx-cx1/2) / fx, (yy-cy/2) / fy, np.ones_like(xx)), axis=0) * depth
     mask = np.ones((H, W), dtype=bool)
 
     # Remove flying points
@@ -48,15 +54,16 @@ def process_pair(disp_path, image_path):
     points = points_grid.transpose(1, 2, 0)[mask]
     colors = image[mask].astype(np.float64) / 255
 
+    # Z軸中心で90度回転を適用
+    points_rotated = np.dot(points, Rotation_Z_90.T)
+
     # Get the directory of the input image to save the PLY file there
     output_dir = Path(image_path).parent
-
-    # Use the parent directory name for the PLY filename
     parent_dir_name = output_dir.name
     ply_filename = output_dir / f'{parent_dir_name}.ply'
 
-    # Save the PLY file
-    write_ply(ply_filename, points, colors)
+    # Save the rotated PLY file
+    write_ply(ply_filename, points_rotated, colors)
     print(f'Saved PLY file to: {ply_filename}')
 def natural_sort_key(s):
     """Sort strings in natural order."""
