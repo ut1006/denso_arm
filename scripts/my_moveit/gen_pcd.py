@@ -54,8 +54,8 @@ def process_pair(disp_path, image_path):
     points = points_grid.transpose(1, 2, 0)[mask]
     colors = image[mask].astype(np.float64) / 255
 
-    # # Z軸中心で90度回転を適用
-    # points_rotated = np.dot(points, Rotation_Z_90.T)
+    # Z軸中心で90度回転を適用
+    points_rotated = np.dot(points, Rotation_Z_90.T)
 
     # Get the directory of the input image to save the PLY file there
     output_dir = Path(image_path).parent
@@ -63,7 +63,7 @@ def process_pair(disp_path, image_path):
     ply_filename = output_dir / f'{parent_dir_name}.ply'
 
     # Save the rotated PLY file
-    write_ply(ply_filename, points, colors)
+    write_ply(ply_filename, points_rotated, colors)
     print(f'Saved PLY file to: {ply_filename}')
 def natural_sort_key(s):
     """Sort strings in natural order."""
