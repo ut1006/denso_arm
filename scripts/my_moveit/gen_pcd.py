@@ -34,6 +34,15 @@ end_header
             f.write(f'{point[0]} {point[1]} {point[2]} {int(color[0] * 255)} {int(color[1] * 255)} {int(color[2] * 255)}\n')
 
 def process_pair(disp_path, image_path):
+    output_dir = Path(image_path).parent
+    parent_dir_name = output_dir.name
+    ply_filename = output_dir / f'{parent_dir_name}.ply'
+
+    # Skip processing if PLY file already exists
+    if ply_filename.exists():
+        print(f"Skipping {output_dir} as PLY file already exists.")
+        return
+            
     # Load disparity and image
     disp = np.load(disp_path)
     image = imread(image_path)
@@ -48,8 +57,8 @@ def process_pair(disp_path, image_path):
     mask = np.ones((H, W), dtype=bool)
 
     # Remove flying points
-    mask[1:][np.abs(depth[1:] - depth[:-1]) > 1] = False
-    mask[:, 1:][np.abs(depth[:, 1:] - depth[:, :-1]) > 1] = False
+    mask[1:][np.abs(depth[1:] - depth[:-1]) > 10] = False
+    mask[:, 1:][np.abs(depth[:, 1:] - depth[:, :-1]) > 10] = False
 
     points = points_grid.transpose(1, 2, 0)[mask]
     colors = image[mask].astype(np.float64) / 255
