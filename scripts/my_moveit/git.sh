@@ -9,4 +9,4 @@ fi
 # 一連のGitコマンドを実行
 git add .
 git commit -m "$1"
-git pull origin master --rebase
+git push origin master
