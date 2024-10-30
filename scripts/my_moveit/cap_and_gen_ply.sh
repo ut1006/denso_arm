@@ -10,3 +10,5 @@ python demo.py --restore_ckpt models/raftstereo-middlebury.pth \
 cd ..
 
 python gen_pcd.py --disp=output/*/*.npy --image=output/*/l*.png 
+
+python tf_ply.py

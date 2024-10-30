@@ -42,7 +42,7 @@ def process_pair(disp_path, image_path):
     if ply_filename.exists():
         print(f"Skipping {output_dir} as PLY file already exists.")
         return
-            
+
     # Load disparity and image
     disp = np.load(disp_path)
     image = imread(image_path)
@@ -57,8 +57,8 @@ def process_pair(disp_path, image_path):
     mask = np.ones((H, W), dtype=bool)
 
     # Remove flying points
-    mask[1:][np.abs(depth[1:] - depth[:-1]) > 10] = False
-    mask[:, 1:][np.abs(depth[:, 1:] - depth[:, :-1]) > 10] = False
+    mask[1:][np.abs(depth[1:] - depth[:-1]) > 100] = False
+    mask[:, 1:][np.abs(depth[:, 1:] - depth[:, :-1]) > 100] = False
 
     points = points_grid.transpose(1, 2, 0)[mask]
     colors = image[mask].astype(np.float64) / 255
