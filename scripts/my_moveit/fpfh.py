@@ -1,10 +1,10 @@
 import sys
 import copy
 import numpy as np
-import open3d as py3d
-from open3d import registration_ransac_based_on_feature_matching as RANSAC
-from open3d import registration_icp as ICP
-from open3d import compute_fpfh_feature as FPFH
+import py3d
+from py3d import registration_ransac_based_on_feature_matching as RANSAC
+from py3d import registration_icp as ICP
+from py3d import compute_fpfh_feature as FPFH
 
 
 def show(model, scene, model_to_scene_trans=np.identity(4)):
