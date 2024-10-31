@@ -16,9 +16,27 @@ Rotation_Z_90 = np.array([
     [0, 0, 1]
 ])
 # Function to write points and colors to a PLY file
+# def write_ply(filename, points, colors):
+#     header = f'''ply
+# format ascii 1.0
+# element vertex {len(points)}
+# property float x
+# property float y
+# property float z
+# property uchar red
+# property uchar green
+# property uchar blue
+# end_header
+# '''
+#     with open(filename, 'w') as f:
+#         f.write(header)
+#         for point, color in zip(points, colors):
+#             f.write(f'{point[0]} {point[1]} {point[2]} {int(color[0] * 255)} {int(color[1] * 255)} {int(color[2] * 255)}\n')
+import struct
+
 def write_ply(filename, points, colors):
     header = f'''ply
-format ascii 1.0
+format binary_little_endian 1.0
 element vertex {len(points)}
 property float x
 property float y
@@ -28,10 +46,15 @@ property uchar green
 property uchar blue
 end_header
 '''
-    with open(filename, 'w') as f:
-        f.write(header)
+    with open(filename, 'wb') as f:
+        # Write the header
+        f.write(header.encode('utf-8'))
+        
+        # Write each point and color as binary data
         for point, color in zip(points, colors):
-            f.write(f'{point[0]} {point[1]} {point[2]} {int(color[0] * 255)} {int(color[1] * 255)} {int(color[2] * 255)}\n')
+            f.write(struct.pack('<fffBBB',
+                                point[0], point[1], point[2],
+                                int(color[0] * 255), int(color[1] * 255), int(color[2] * 255)))
 
 def process_pair(disp_path, image_path):
     output_dir = Path(image_path).parent
