@@ -4,18 +4,41 @@ from pathlib import Path
 from scipy.spatial.transform import Rotation as R
 import colorsys
 
+# def load_ply(ply_path):
+#     points, colors = [], []
+#     with open(ply_path, 'r') as f:
+#         data = f.readlines()
+#         vertex_section = False
+#         for line in data:
+#             if line.startswith("end_header"):
+#                 vertex_section = True
+#             elif vertex_section:
+#                 x, y, z, r, g, b = map(float, line.split())
+#                 points.append([x, y, z])
+#                 colors.append([int(r), int(g), int(b)])
+#     return np.array(points), np.array(colors)
+import struct
+import numpy as np
+
 def load_ply(ply_path):
     points, colors = [], []
-    with open(ply_path, 'r') as f:
-        data = f.readlines()
-        vertex_section = False
-        for line in data:
-            if line.startswith("end_header"):
-                vertex_section = True
-            elif vertex_section:
-                x, y, z, r, g, b = map(float, line.split())
-                points.append([x, y, z])
-                colors.append([int(r), int(g), int(b)])
+    with open(ply_path, 'rb') as f:
+        # Read header
+        while True:
+            line = f.readline().decode('utf-8').strip()
+            if line.startswith("element vertex"):
+                num_vertices = int(line.split()[-1])
+            elif line.startswith("end_header"):
+                break
+
+        # Read vertex data in binary format
+        for _ in range(num_vertices):
+            # Read 3 floats for x, y, z and 3 unsigned bytes for r, g, b
+            data = f.read(15)  # 3 * 4 bytes for floats + 3 * 1 byte for uchar
+            x, y, z, r, g, b = struct.unpack('<fffBBB', data)
+            points.append([x, y, z])
+            colors.append([r, g, b])
+
     return np.array(points), np.array(colors)
 
 def load_csv_transform(csv_path):
@@ -58,15 +81,41 @@ def filter_points(points, colors):
     mask = ~(green_mask | white_mask)
     return points[mask], colors[mask]
 
+# def save_transformed_ply(ply_path, points, colors):
+#     output_path = ply_path.parent / (ply_path.stem + "_transformed.ply")
+#     with open(output_path, 'w') as f:
+#         f.write("ply\nformat ascii 1.0\nelement vertex {}\n".format(len(points)))
+#         f.write("property float x\nproperty float y\nproperty float z\n")
+#         f.write("property uchar red\nproperty uchar green\nproperty uchar blue\nend_header\n")
+#         for point, color in zip(points, colors):
+#             f.write("{} {} {} {} {} {}\n".format(*point, *color))
+#     print(f"Saved transformed PLY to {output_path}")
+import struct
+
 def save_transformed_ply(ply_path, points, colors):
     output_path = ply_path.parent / (ply_path.stem + "_transformed.ply")
-    with open(output_path, 'w') as f:
-        f.write("ply\nformat ascii 1.0\nelement vertex {}\n".format(len(points)))
-        f.write("property float x\nproperty float y\nproperty float z\n")
-        f.write("property uchar red\nproperty uchar green\nproperty uchar blue\nend_header\n")
+    header = f'''ply
+format binary_little_endian 1.0
+element vertex {len(points)}
+property float x
+property float y
+property float z
+property uchar red
+property uchar green
+property uchar blue
+end_header
+'''
+
+    with open(output_path, 'wb') as f:
+        # Write header as binary
+        f.write(header.encode('utf-8'))
+
+        # Write points and colors in binary format
         for point, color in zip(points, colors):
-            f.write("{} {} {} {} {} {}\n".format(*point, *color))
-    print(f"Saved transformed PLY to {output_path}")
+            f.write(struct.pack('<fffBBB',
+                                point[0], point[1], point[2],
+                                int(color[0]), int(color[1]), int(color[2])))
+    print(f"Saved binary transformed PLY to {output_path}")
 
 # Main function to apply transformation and filtering to PLY points
 def main(ply_folder):
