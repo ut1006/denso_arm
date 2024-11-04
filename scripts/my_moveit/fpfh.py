@@ -55,7 +55,7 @@ def align_with_targets(source_file, target_files):
 
 # Define source and multiple targets
 source_path = "output/0013/0013_transformed.ply"
-target_paths = ["output/0014/0014_transformed.ply", "output/0015/0015_transformed.ply"]
+target_paths = ["output/0014/0014_transformed.ply", "output/0015/0015_transformed.ply", "output/0016/0016_transformed.ply", "output/0017/0017_transformed.ply", "output/0018/0018_transformed.ply"]
 
 # Align the source with each target
 align_with_targets(source_path, target_paths)
