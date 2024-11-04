@@ -63,7 +63,7 @@ def filter_brown_points(pcd):
     
     return filtered_pcd
 
-def remove_radius_outliers(pcd, nb_points=16, radius=0.05):
+def remove_radius_outliers(pcd, nb_points=32, radius=0.05):
     print("Radius outlier removal")
     cl, ind = pcd.remove_radius_outlier(nb_points=nb_points, radius=radius)
     print(f"Points remaining after radius outlier removal: {len(ind)}")
