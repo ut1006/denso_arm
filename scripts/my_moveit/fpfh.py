@@ -1,69 +1,61 @@
-import sys
+from pathlib import Path
+import open3d as o3d
 import copy
 import numpy as np
-import py3d
-from py3d import registration_ransac_based_on_feature_matching as RANSAC
-from py3d import registration_icp as ICP
-from py3d import compute_fpfh_feature as FPFH
 
+def draw_registration_result(source, target, transformation):
+    # Visualize the alignment result without saving
+    source_temp = copy.deepcopy(source)
+    source_temp.transform(transformation)
+    o3d.visualization.draw_geometries([source_temp, target],
+                                      zoom=0.5,
+                                      front=[-0.2458, -0.8088, 0.5342],
+                                      lookat=[1.7745, 2.2305, 0.9787],
+                                      up=[0.3109, -0.5878, -0.7468])
 
-def show(model, scene, model_to_scene_trans=np.identity(4)):
-    model_t = copy.deepcopy(model)
-    scene_t = copy.deepcopy(scene)
+def align_with_targets(source_file, target_files):
+    source = o3d.io.read_point_cloud(source_file)
+    current_transformation = np.identity(4)
 
-    model_t.paint_uniform_color([1, 0, 0])
-    scene_t.paint_uniform_color([0, 0, 1])
+    for target_file in target_files:
+        print(f"\nAligning with target: {target_file}")
+        
+        target = o3d.io.read_point_cloud(target_file)
+        voxel_radius = [0.04, 0.02, 0.01]
+        max_iter = [50, 30, 14]
 
-    model_t.transform(model_to_scene_trans)
+        for scale in range(3):
+            iter = max_iter[scale]
+            radius = voxel_radius[scale]
 
-    py3d.draw_geometries([model_t, scene_t])
+            # Downsample and estimate normals
+            source_down = source.voxel_down_sample(radius)
+            target_down = target.voxel_down_sample(radius)
+            source_down.estimate_normals(o3d.geometry.KDTreeSearchParamHybrid(radius=radius * 2, max_nn=30))
+            target_down.estimate_normals(o3d.geometry.KDTreeSearchParamHybrid(radius=radius * 2, max_nn=30))
 
+            # Perform colored ICP
+            result_icp = o3d.pipelines.registration.registration_colored_icp(
+                source_down, target_down, radius, current_transformation,
+                o3d.pipelines.registration.TransformationEstimationForColoredICP(),
+                o3d.pipelines.registration.ICPConvergenceCriteria(relative_fitness=1e-6, relative_rmse=1e-6, max_iteration=iter))
+            current_transformation = result_icp.transformation
 
-model = py3d.read_point_cloud("output/0001/0001.ply")
-scene = py3d.read_point_cloud("output/0003/0003.ply")
-## PCLモデルを使うならこちら
-#model = py3d.read_point_cloud("milk.pcd")
-#scene = py3d.read_point_cloud("milk_cartoon_all_small_clorox.pcd")
+            print(result_icp)
 
-# いろいろなサイズの元： model点群の1/10を基本サイズsizeにする
-size = np.abs((model.get_max_bound() - model.get_min_bound())).max() / 10
-kdt_n = py3d.KDTreeSearchParamHybrid(radius=size, max_nn=50)
-kdt_f = py3d.KDTreeSearchParamHybrid(radius=size * 50, max_nn=50)
+        draw_registration_result(source, target, current_transformation)
 
-py3d.estimate_normals(model, kdt_n)
-py3d.estimate_normals(scene, kdt_n)
-show(model, scene)
+    # Save the final transformed source point cloud after all alignments
+    source.transform(current_transformation)
+    source_path = Path(source_file)
+    final_filename = source_path.stem + "_final_colored_icp.ply"
+    final_path = source_path.with_name(final_filename)
+    o3d.io.write_point_cloud(str(final_path), source)
+    print("Final transformed source saved as:", final_filename)
 
-# ダウンサンプリング
-model_d = py3d.voxel_down_sample(model, size)
-scene_d = py3d.voxel_down_sample(scene, size)
-py3d.estimate_normals(model_d, kdt_n)
-py3d.estimate_normals(scene_d, kdt_n)
-show(model_d, scene_d)
+# Define source and multiple targets
+source_path = "output/0013/0013_transformed.ply"
+target_paths = ["output/0014/0014_transformed.ply", "output/0015/0015_transformed.ply"]
 
-# 特徴量計算
-model_f = FPFH(model_d, kdt_f)
-scene_f = FPFH(scene_d, kdt_f)
-
-# 準備
-checker = [py3d.CorrespondenceCheckerBasedOnEdgeLength(0.9),
-           py3d.CorrespondenceCheckerBasedOnDistance(size * 2)]
-
-est_ptp = py3d.TransformationEstimationPointToPoint()
-est_ptpln = py3d.TransformationEstimationPointToPlane()
-
-criteria = py3d.RANSACConvergenceCriteria(max_iteration=40000,
-                                          max_validation=500)
-# RANSACマッチング
-result1 = RANSAC(model_d, scene_d,
-                 model_f, scene_f,
-                 max_correspondence_distance=size * 2,
-                 estimation_method=est_ptp,
-                 ransac_n=4,
-                 checkers=checker,
-                 criteria=criteria)
-show(model_d, scene_d, result1.transformation)
-
-# ICPで微修正
-result2 = ICP(model, scene, size, result1.transformation, est_ptpln)
-show(model, scene, result2.transformation)
+# Align the source with each target
+align_with_targets(source_path, target_paths)
