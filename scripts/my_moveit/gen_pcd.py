@@ -55,7 +55,7 @@ def process_pair(disp_path, image_path):
     disp = np.load(disp_path)
     image = imread(image_path)
 
-    # Inverse project. PLY origin is on the left camera and x↑, y↓, z×. 
+    # Inverse project. PLY origin is on the left camera and x↑, y↓, z×. mm!!
     depth = (fx * baseline) / (-disp + (cx2 - cx1))
     H, W = depth.shape
     xx, yy = np.meshgrid(np.arange(W), np.arange(H))
