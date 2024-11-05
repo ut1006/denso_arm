@@ -19,7 +19,7 @@ def filter_non_green_points(pcd):
     hsv_colors = mcolors.rgb_to_hsv(colors)
 
     # HSV range for green
-    green_range = ((45/ 360, 0.3, 0.13), (135/ 360, 1.0, 0.745))
+    green_range = ((45/ 360, 0.3, 0.13), (135/ 360, 1.0, 0.6))
 
     # Mask to filter out green points
     green_mask = (
