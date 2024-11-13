@@ -60,31 +60,18 @@ class MoveGroupPythonInterfaceTutorial(object):
         latest_dir = max(files, key=lambda x: int(os.path.basename(x)))
         latest_num = int(os.path.basename(latest_dir))
         return latest_num + 1
-# TF（カメラ姿勢）を取得してCSVに保存する関数
-def save_tf_data(count, dir_name, current_pose):
-    try:
-        # base_linkからzedm_camera_centerまでのTFを取得
-        (trans, rot) = listener.lookupTransform('base_link', 'zedm_left_camera_frame', rospy.Time(0))
 
-        # CSVファイルに姿勢情報を保存
-        tf_filename = os.path.join(dir_name, f"tf{count:04d}.csv")  # 保存先を画像と同じディレクトリに変更
-        with open(tf_filename, mode='w', newline='') as file:
-            writer = csv.writer(file)
-            # ヘッダーの行
-            writer.writerow(['Translation X', 'Translation Y', 'Translation Z',
-                             'Rotation X', 'Rotation Y', 'Rotation Z', 'Rotation W'])
-            # 平行移動と回転の値をコンマ区切りで書き込む
-            writer.writerow([trans[0], trans[1], trans[2], rot[0], rot[1], rot[2], rot[3]])
-
-            # 3行目にcurrent_poseの情報を追加
-            writer.writerow(['Current Pose Position X', 'Current Pose Position Y', 'Current Pose Position Z',
-                             'Current Pose Orientation X', 'Current Pose Orientation Y', 'Current Pose Orientation Z', 'Current Pose Orientation W'])
-            writer.writerow([current_pose.position.x, current_pose.position.y, current_pose.position.z,
-                             current_pose.orientation.x, current_pose.orientation.y, current_pose.orientation.z, current_pose.orientation.w])
-        
-        print(f"Saved TF data and current pose to {tf_filename}")
-    except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-        print("Failed to get transform")
+    def save_tf_data(self, count, dir_name):
+        try:
+            (trans, rot) = self.listener.lookupTransform('base_link', 'zedm_left_camera_frame', rospy.Time(0))
+            tf_filename = os.path.join(dir_name, f"tf{count:04d}.csv")
+            with open(tf_filename, mode='w', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow(['Translation X', 'Translation Y', 'Translation Z', 'Rotation X', 'Rotation Y', 'Rotation Z', 'Rotation W'])
+                writer.writerow([trans[0], trans[1], trans[2], rot[0], rot[1], rot[2], rot[3]])
+            print(f"Saved TF data to {tf_filename}")
+        except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+            print("Failed to get transform")
 
     def capture_images_and_save(self):
         if self.left_image_rect is not None and self.right_image_rect is not None:
@@ -156,7 +143,7 @@ def main():
                 print("Relative move successful!")
             else:
                 print("Failed to complete the relative move.")
-
+                
             # 移動後に撮影するか決める
             capture_input = input("Press 't' to capture images or any other key to skip: ")
             if capture_input.lower() == 't':
